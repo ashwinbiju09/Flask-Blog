@@ -1,34 +1,25 @@
-import email,secrets,os
+import secrets,os
+from turtle import pos
 from PIL import Image
-from fileinput import filename
-from flask import render_template,url_for,flash,redirect,request
+from flask import render_template,url_for,flash,redirect,request,abort
+from matplotlib.pyplot import legend
 from main import app,db, bcrypt
-from main.forms import RegistrationForm, LoginForm, Update
+from main.forms import RegistrationForm, LoginForm, Update,PostForm
 from main.models import User,Post
 from flask_login import login_user,logout_user,login_required,current_user
-
-posts = [
-    {
-        'author' : 'Creator 1',
-        'title' : 'Post 1',
-        'content' : 'First Post'
-    },
-    {
-        'author' : 'Creator 2',
-        'title' : 'Post 2',
-        'content' : 'Second Post'
-    }
-]
 
 
 @app.route("/")
 @app.route("/home")
 def home():
+    posts = Post.query.all()
     return render_template('home.html',posts=posts)
+
 
 @app.route("/about")
 def about():
     return render_template('about.html',title='About')
+
 
 @app.route("/Register",methods=['GET','POST'])
 def Register():
@@ -43,6 +34,7 @@ def Register():
         flash('Account created ! Please Login !','success')
         return redirect(url_for('Login'))
     return render_template('register.html', title='Register', form=form)
+
 
 @app.route("/Login",methods=['GET','POST'])
 def Login():
@@ -59,10 +51,12 @@ def Login():
             flash('Try again !','danger')
     return render_template('login.html', title='Login', form=form)
 
+
 @app.route("/Logout")
 def Logout():
     logout_user()
     return redirect(url_for('home'))
+
 
 def save_picture(form_picture):
     random_hex = secrets.token_hex(8)
@@ -90,10 +84,59 @@ def Account():
         db.session.commit()
         flash('Account updated', category='success')
         return redirect(url_for('Account'))
-
     elif request.method == 'GET':
         form.username.data = current_user.username
         form.email.data = current_user.email
 
     img_file = url_for('static', filename='profile_pics/' + current_user.img_file)
     return render_template('account.html', title='Account', img_file=img_file ,form=form)
+
+
+@app.route('/Post/new',methods=['GET','POST'])
+@login_required
+def new_post():
+    form = PostForm()
+    if form.validate_on_submit():
+        post = Post(title=form.title.data,content=form.content.data, author=current_user)
+        db.session.add(post)
+        db.session.commit()
+        flash('Post Created !',category='success')
+        return redirect(url_for('home'))
+    return render_template('create_post.html',title='New Post',form=form,legend='Update Post')
+
+
+@app.route('/Post/<int:post_id>')
+def post(post_id):
+    post = Post.query.get_or_404(post_id)
+    return render_template('post.html',title=post.title,post=post)
+
+
+@app.route('/Post/<int:post_id>/update',methods=['GET','POST'])
+@login_required
+def update_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    if post.author != current_user:
+        abort(403)
+    form = PostForm()
+    if form.validate_on_submit():
+        post.title = form.title.data
+        post.content = form.content.data
+        db.session.commit()
+        flash('Update Successful',category='success')
+        return redirect(url_for('post',post_id=post.id))
+    elif request.method =='GET':
+        form.title.data = post.title
+        form.content.data = post.content
+    return render_template('create_post.html', title='Update Post', form=form, legend='Update Post')
+
+
+@app.route('/Post/<int:post_id>/delete',methods=['POST'])
+@login_required
+def delete_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    if post.author != current_user:
+        abort(403)
+    db.session.delete(post)
+    db.session.commit()
+    flash('Post Deleted',category='success')
+    return redirect(url_for('home'))

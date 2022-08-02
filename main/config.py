@@ -2,12 +2,12 @@
 
 class Config:
     
-    SECRET_KEY = 'd7659fef2c1feeb0577f780687697ce9'
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///site.db'
+    SECRET_KEY = ''
+    SQLALCHEMY_DATABASE_URI = ''
     
-    MAIL_SERVER = 'smtp.googlemail.com'
-    MAIL_USERNAME ='20eucs018@skcet.ac.in'
-    MAIL_PASSWORD ='Ashwin11@'
+    MAIL_SERVER = ''
+    MAIL_USERNAME =''
+    MAIL_PASSWORD =''
 
     # MAIL_SERVER='smtp.mailtrap.io'
     MAIL_PORT = 587
@@ -17,4 +17,4 @@ class Config:
     MAIL_USE_TLS = True
     MAIL_USE_SSL = False
 
-    APP_URL ='http://localhost:5000'
+    APP_URL =''

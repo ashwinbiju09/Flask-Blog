@@ -1,11 +1,20 @@
-import os
 
 
 class Config:
-    SECRET_KEY = 'd7659fef2c1feeb0577f780687697ce9'
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///site.db'
+    
+    SECRET_KEY = 'secretkey'
+    SQLALCHEMY_DATABASE_URI = 'db'
+    
     MAIL_SERVER = 'smtp.googlemail.com'
-    MAIL_POST = 587
+    MAIL_USERNAME ='email'
+    MAIL_PASSWORD ='password'
+
+    # MAIL_SERVER='smtp.mailtrap.io'
+    MAIL_PORT = 587
+    # MAIL_USERNAME = '5cae7372502387'
+    # MAIL_PASSWORD = '43468280f33dbd'
+
     MAIL_USE_TLS = True
-    MAIL_USERNAME = os.environ.get('EMAIL_USER')
-    MAIL_PASSWORD = os.environ.get('EMAIL_PASS')
+    MAIL_USE_SSL = False
+
+    APP_URL ='http://localhost:5000'
